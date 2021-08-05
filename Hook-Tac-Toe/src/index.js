@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import ReactDOM from "react-dom";
 import "./index.css";
 
-function Square({ value, onClick }) {
+const Square = ({ value, onClick }) => {
 
   return (
     <button className="square" onClick={onClick}>
@@ -11,7 +11,7 @@ function Square({ value, onClick }) {
   );
 }
 
-function Restart({ onClick }) {
+const Restart = ({ onClick }) => {
 
   return (
     <button className="restart" onClick={onClick}>
@@ -20,14 +20,65 @@ function Restart({ onClick }) {
   );
 }
 
-function Game() {
-
+const Game = () => {
   const [ squares, setSquares ] = useState(Array(9).fill(null));
   const [ isXNext, setIsXNext ] = useState(true);
-  const winner = calculateWinner(squares);
   const nextSymbol = isXNext ? "X" : "O";
-  
-  function renderSquare(i) {
+
+  const renderRestartButton = () => {
+    return (
+      <Restart
+        onClick={() => {
+          setSquares(Array(9).fill(null));
+          setIsXNext(true);
+        }}
+      />
+    );
+  }
+
+  const calculateWinner = (squares) => {
+    const possibleLines = [
+      [0, 1, 2],
+      [3, 4, 5],
+      [6, 7, 8],
+      [0, 3, 6],
+      [1, 4, 7],
+      [2, 5, 8],
+      [0, 4, 8],
+      [2, 4, 6]
+    ];
+    // go over all possibly winning lines and check if they consist of only X's/only O's
+    for (let i = 0; i < possibleLines.length; i++) {
+      const [a, b, c] = possibleLines[i];
+      if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+        return squares[a];
+      }
+    }
+    return null;
+  }
+
+  const winner = calculateWinner(squares);
+
+  const isBoardFull = (squares) => {
+    for (let i = 0; i < squares.length; i++) {
+      if (squares[i] == null) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  const getStatus = () => {
+    if (winner) {
+      return "Winner: " + winner;
+    } else if (isBoardFull(squares)) {
+      return "Draw!";
+    } else {
+      return "Next player: " + (isXNext ? "X" : "O");
+    }
+  }
+
+  const renderSquare = (i) => {
     return (
       <Square
         value={squares[i]}
@@ -38,24 +89,13 @@ function Game() {
           const nextSquares = squares.slice();
           nextSquares[i] = (isXNext ? "X" : "O");
           setSquares(nextSquares);
-
+  
           setIsXNext(!isXNext); // toggle turns
         }}
       />
     );
   }
 
-  function renderRestartButton() {
-    return (
-      <Restart
-        onClick={() => {
-          setSquares(Array(9).fill(null));
-          setIsXNext(true);
-        }}
-      />
-    );
-  }
-  
   return (
     <div className="container">
       <div className="game">
@@ -81,48 +121,6 @@ function Game() {
       </div>
     </div>
   );
-
-  function calculateWinner(squares) {
-    const possibleLines = [
-      [0, 1, 2],
-      [3, 4, 5],
-      [6, 7, 8],
-      [0, 3, 6],
-      [1, 4, 7],
-      [2, 5, 8],
-      [0, 4, 8],
-      [2, 4, 6]
-    ];
-    // go over all possibly winning lines and check if they consist of only X's/only O's
-    for (let i = 0; i < possibleLines.length; i++) {
-      const [a, b, c] = possibleLines[i];
-      if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-        return squares[a];
-      }
-    }
-    return null;
-  }
-  
-  function isBoardFull(squares) {
-    for (let i = 0; i < squares.length; i++) {
-      if (squares[i] == null) {
-        return false;
-      }
-    }
-    return true;
-  }
-  
-  function getStatus() {
-    if (winner) {
-      return "Winner: " + winner;
-    } else if (isBoardFull(squares)) {
-      return "Draw!";
-    } else {
-      return "Next player: " + (isXNext ? "X" : "O");
-    }
-  }
 }
 
-
 ReactDOM.render(<Game />, document.getElementById("root"));
-
